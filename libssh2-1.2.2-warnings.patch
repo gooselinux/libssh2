@@ -1,0 +1,211 @@
+diff --git a/example/simple/scp.c b/example/simple/scp.c
+index 12c0c92..f41ec3d 100644
+--- a/example/simple/scp.c
++++ b/example/simple/scp.c
+@@ -32,6 +32,9 @@
+ #include <stdio.h>
+ #include <ctype.h>
+ 
++/* Suppress warnings for __attribute__((warn_unused_result)) */
++#define IGNORE_CALL_RESULT(call) do { if (call) {} } while(0)
++
+ int main(int argc, char *argv[])
+ {
+     unsigned long hostaddr;
+@@ -146,7 +149,7 @@ int main(int argc, char *argv[])
+ 
+         rc = libssh2_channel_read(channel, mem, amount);
+         if(rc == amount) {
+-            write(1, mem, rc);
++            IGNORE_CALL_RESULT(write(/* STDOUT_FILENO */ 1, mem, rc));
+         }
+         else {
+             fprintf(stderr, "libssh2_channel_read() failed: %d\n", rc);
+diff --git a/example/simple/scp_nonblock.c b/example/simple/scp_nonblock.c
+index 3480cfd..e41beb6 100644
+--- a/example/simple/scp_nonblock.c
++++ b/example/simple/scp_nonblock.c
+@@ -40,6 +40,9 @@
+ #include <stdio.h>
+ #include <ctype.h>
+ 
++/* Suppress warnings for __attribute__((warn_unused_result)) */
++#define IGNORE_CALL_RESULT(call) do { if (call) {} } while(0)
++
+ /* diff in ms */
+ static long tvdiff(struct timeval newer, struct timeval older)
+ {
+@@ -229,7 +232,7 @@ int main(int argc, char *argv[])
+             /* loop until we block */
+             rc = libssh2_channel_read(channel, mem, amount);
+             if (rc > 0) {
+-                write(1, mem, rc);
++                IGNORE_CALL_RESULT(write(/* STDOUT_FILENO */ 1, mem, rc));
+                 got += rc;
+                 total += rc;
+             }
+diff --git a/example/simple/scp_write.c b/example/simple/scp_write.c
+index f6af186..d455479 100644
+--- a/example/simple/scp_write.c
++++ b/example/simple/scp_write.c
+@@ -35,10 +35,10 @@
+ int main(int argc, char *argv[])
+ {
+     unsigned long hostaddr;
+-    int sock, i, auth_pw = 1;
++    int sock = 0, i, auth_pw = 1;
+     struct sockaddr_in sin;
+     const char *fingerprint;
+-    LIBSSH2_SESSION *session;
++    LIBSSH2_SESSION *session = NULL;
+     LIBSSH2_CHANNEL *channel;
+     const char *username="username";
+     const char *password="password";
+diff --git a/example/simple/scp_write_nonblock.c b/example/simple/scp_write_nonblock.c
+index 092505e..caab05c 100644
+--- a/example/simple/scp_write_nonblock.c
++++ b/example/simple/scp_write_nonblock.c
+@@ -36,10 +36,10 @@
+ int main(int argc, char *argv[])
+ {
+     unsigned long hostaddr;
+-    int sock, i, auth_pw = 1;
++    int sock = 0, i, auth_pw = 1;
+     struct sockaddr_in sin;
+     const char *fingerprint;
+-    LIBSSH2_SESSION *session;
++    LIBSSH2_SESSION *session = NULL;
+     LIBSSH2_CHANNEL *channel;
+     const char *username="username";
+     const char *password="password";
+diff --git a/example/simple/sftp.c b/example/simple/sftp.c
+index 2c9c2c3..1fe4088 100644
+--- a/example/simple/sftp.c
++++ b/example/simple/sftp.c
+@@ -38,6 +38,8 @@
+ #include <stdio.h>
+ #include <ctype.h>
+ 
++/* Suppress warnings for __attribute__((warn_unused_result)) */
++#define IGNORE_CALL_RESULT(call) do { if (call) {} } while(0)
+ 
+ const char *keyfile1="~/.ssh/id_rsa.pub";
+ const char *keyfile2="~/.ssh/id_rsa";
+@@ -221,7 +223,7 @@ int main(int argc, char *argv[])
+         fprintf(stderr, "libssh2_sftp_read()!\n");
+         rc = libssh2_sftp_read(sftp_handle, mem, sizeof(mem));
+         if (rc > 0) {
+-            write(1, mem, rc);
++            IGNORE_CALL_RESULT(write(/* STDOUT_FILENO */ 1, mem, rc));
+         } else {
+             break;
+         }
+diff --git a/example/simple/sftp_RW_nonblock.c b/example/simple/sftp_RW_nonblock.c
+index 70aad82..b2a24c0 100644
+--- a/example/simple/sftp_RW_nonblock.c
++++ b/example/simple/sftp_RW_nonblock.c
+@@ -45,6 +45,9 @@
+                                        example uses to store the downloaded
+                                        file in */
+ 
++/* Suppress warnings for __attribute__((warn_unused_result)) */
++#define IGNORE_CALL_RESULT(call) do { if (call) {} } while(0)
++
+ int main(int argc, char *argv[])
+ {
+     int sock, i, auth_pw = 1;
+@@ -177,9 +180,9 @@ int main(int argc, char *argv[])
+ 
+             if(rc > 0) {
+                 /* write to stderr */
+-                write(2, mem, rc);
++                IGNORE_CALL_RESULT(write(/* STDERR_FILENO */ 2, mem, rc));
+                 /* write to temporary storage area */
+-                fwrite(mem, rc, 1, tempstorage);
++                IGNORE_CALL_RESULT(fwrite(mem, rc, 1, tempstorage));
+             }
+         } while (rc > 0);
+ 
+diff --git a/example/simple/sftp_nonblock.c b/example/simple/sftp_nonblock.c
+index 45e1554..01881c2 100644
+--- a/example/simple/sftp_nonblock.c
++++ b/example/simple/sftp_nonblock.c
+@@ -41,6 +41,9 @@
+ #include <stdio.h>
+ #include <ctype.h>
+ 
++/* Suppress warnings for __attribute__((warn_unused_result)) */
++#define IGNORE_CALL_RESULT(call) do { if (call) {} } while(0)
++
+ /* diff in ms */
+ static long tvdiff(struct timeval newer, struct timeval older)
+ {
+@@ -241,7 +244,7 @@ int main(int argc, char *argv[])
+         }
+         if (rc > 0) {
+             total += rc;
+-            write(1, mem, rc);
++            IGNORE_CALL_RESULT(write(/* STDOUT_FILENO */ 1, mem, rc));
+         } else {
+             break;
+         }
+diff --git a/example/simple/sftp_write.c b/example/simple/sftp_write.c
+index 4d583ab..9a3f25b 100644
+--- a/example/simple/sftp_write.c
++++ b/example/simple/sftp_write.c
+@@ -38,10 +38,10 @@
+ int main(int argc, char *argv[])
+ {
+     unsigned long hostaddr;
+-    int sock, i, auth_pw = 1;
++    int sock = 0, i, auth_pw = 1;
+     struct sockaddr_in sin;
+     const char *fingerprint;
+-    LIBSSH2_SESSION *session;
++    LIBSSH2_SESSION *session = NULL;
+     const char *username="username";
+     const char *password="password";
+     const char *loclfile="sftp_write.c";
+diff --git a/example/simple/sftp_write_nonblock.c b/example/simple/sftp_write_nonblock.c
+index a40046f..25f3301 100644
+--- a/example/simple/sftp_write_nonblock.c
++++ b/example/simple/sftp_write_nonblock.c
+@@ -38,10 +38,10 @@
+ int main(int argc, char *argv[])
+ {
+     unsigned long hostaddr;
+-    int sock, i, auth_pw = 1;
++    int sock = 0, i, auth_pw = 1;
+     struct sockaddr_in sin;
+     const char *fingerprint;
+-    LIBSSH2_SESSION *session;
++    LIBSSH2_SESSION *session = NULL;
+     const char *username="username";
+     const char *password="password";
+     const char *loclfile="sftp_write_nonblock.c";
+diff --git a/src/channel.c b/src/channel.c
+index 06e0e77..ea42be4 100644
+--- a/src/channel.c
++++ b/src/channel.c
+@@ -1285,7 +1285,7 @@ _libssh2_channel_process_startup(LIBSSH2_CHANNEL *channel,
+                                  const char *message, unsigned int message_len)
+ {
+     LIBSSH2_SESSION *session = channel->session;
+-    unsigned char *s, *data;
++    unsigned char *s, *data = NULL;
+     static const unsigned char reply_codes[3] =
+         { SSH_MSG_CHANNEL_SUCCESS, SSH_MSG_CHANNEL_FAILURE, 0 };
+     unsigned long data_len;
+diff --git a/src/publickey.c b/src/publickey.c
+index 8ca499c..aa1bbb7 100644
+--- a/src/publickey.c
++++ b/src/publickey.c
+@@ -344,7 +344,7 @@ libssh2_publickey_init(LIBSSH2_SESSION * session)
+ {
+     /* 19 = packet_len(4) + version_len(4) + "version"(7) + version_num(4) */
+     unsigned char buffer[19];
+-    unsigned char *s;
++    unsigned char *s = NULL;
+     int response;
+     int rc;
+ 
